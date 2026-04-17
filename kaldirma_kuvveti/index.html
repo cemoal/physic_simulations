@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kaldırma Kuvveti Simülasyonu</title>
+  <meta name="description" content="İnteraktif kaldırma kuvveti (Arşimet prensibi) simülasyonu - sıvı içinde cisimlere etki eden kuvvetleri keşfedin." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header id="top-bar">
+      <div id="title-area">
+        <span class="title-icon">🌊</span>
+        <div>
+          <h1>Kaldırma Kuvveti</h1>
+          <p class="subtitle">Arşimet Prensibi Simülasyonu</p>
+        </div>
+      </div>
+      <div id="header-controls">
+        <button id="reset-btn" class="btn btn-secondary">↺ Sıfırla</button>
+        <button id="info-btn" class="btn btn-ghost">ℹ Bilgi</button>
+      </div>
+    </header>
+
+    <!-- Main Layout -->
+    <main id="main-layout">
+      <!-- Left Panel: Controls -->
+      <aside id="left-panel">
+        <!-- Block Properties -->
+        <section class="panel-card" id="block-props-card">
+          <h2 class="panel-title">🧊 Cisim Özellikleri</h2>
+
+          <div class="control-group">
+            <label for="block-select">Cisim Seç</label>
+            <div class="block-selector">
+              <button class="block-btn active" data-block="A" id="btn-block-a">A Cismi</button>
+              <button class="block-btn" data-block="B" id="btn-block-b">B Cismi</button>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label>Kütle <span class="unit">(kg)</span></label>
+            <div class="slider-row">
+              <input type="range" id="mass-slider" min="0.5" max="20" step="0.5" value="5" />
+              <span class="value-display" id="mass-value">5.00</span>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label>Hacim <span class="unit">(L)</span></label>
+            <div class="slider-row">
+              <input type="range" id="volume-slider" min="0.5" max="20" step="0.5" value="5" />
+              <span class="value-display" id="volume-value">5.00</span>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <span>Özkütle:</span>
+            <span class="highlight-value" id="density-display">1.00 kg/L</span>
+          </div>
+        </section>
+
+        <!-- Liquid Properties -->
+        <section class="panel-card" id="liquid-card">
+          <h2 class="panel-title">💧 Sıvı Seçimi</h2>
+          <div class="liquid-grid" id="liquid-grid">
+            <button class="liquid-btn" data-liquid="gasoline" id="btn-gasoline">
+              <span class="liq-icon">⛽</span>
+              <span class="liq-name">Benzin</span>
+              <span class="liq-density">0.70 kg/L</span>
+            </button>
+            <button class="liquid-btn active" data-liquid="water" id="btn-water">
+              <span class="liq-icon">💧</span>
+              <span class="liq-name">Su</span>
+              <span class="liq-density">1.00 kg/L</span>
+            </button>
+            <button class="liquid-btn" data-liquid="seawater" id="btn-seawater">
+              <span class="liq-icon">🌊</span>
+              <span class="liq-name">Deniz Suyu</span>
+              <span class="liq-density">1.03 kg/L</span>
+            </button>
+            <button class="liquid-btn" data-liquid="glycerin" id="btn-glycerin">
+              <span class="liq-icon">🫙</span>
+              <span class="liq-name">Gliserin</span>
+              <span class="liq-density">1.26 kg/L</span>
+            </button>
+            <button class="liquid-btn" data-liquid="mercury" id="btn-mercury">
+              <span class="liq-icon">🔘</span>
+              <span class="liq-name">Cıva</span>
+              <span class="liq-density">13.6 kg/L</span>
+            </button>
+          </div>
+          <div class="info-row">
+            <span>Sıvı Özkütlesi:</span>
+            <span class="highlight-value" id="liquid-density-display">1.00 kg/L</span>
+          </div>
+        </section>
+
+        <!-- Force Display Toggle -->
+        <section class="panel-card" id="forces-card">
+          <h2 class="panel-title">⚡ Kuvvet Gösterimi</h2>
+          <label class="toggle-row" for="show-gravity">
+            <span class="toggle-label">
+              <span class="force-dot gravity"></span>
+              Yer Çekimi (Ağırlık)
+            </span>
+            <input type="checkbox" id="show-gravity" checked />
+            <span class="toggle-switch"></span>
+          </label>
+          <label class="toggle-row" for="show-buoyancy">
+            <span class="toggle-label">
+              <span class="force-dot buoyancy"></span>
+              Kaldırma Kuvveti
+            </span>
+            <input type="checkbox" id="show-buoyancy" checked />
+            <span class="toggle-switch"></span>
+          </label>
+          <label class="toggle-row" for="show-net">
+            <span class="toggle-label">
+              <span class="force-dot net"></span>
+              Net Kuvvet
+            </span>
+            <input type="checkbox" id="show-net" checked />
+            <span class="toggle-switch"></span>
+          </label>
+          <label class="toggle-row" for="show-values">
+            <span class="toggle-label">
+              <span class="force-dot values"></span>
+              Değerleri Göster
+            </span>
+            <input type="checkbox" id="show-values" checked />
+            <span class="toggle-switch"></span>
+          </label>
+        </section>
+      </aside>
+
+      <!-- Center: Simulation Canvas -->
+      <div id="sim-area">
+        <canvas id="sim-canvas"></canvas>
+        <div id="canvas-overlay">
+          <div id="status-badge" class="status-badge floating"></div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Measurements -->
+      <aside id="right-panel">
+        <!-- Force Readings -->
+        <section class="panel-card" id="force-readings">
+          <h2 class="panel-title">📊 Kuvvet Ölçümleri</h2>
+          <div class="force-meter" id="weight-meter">
+            <div class="meter-label">
+              <span class="force-dot gravity"></span>
+              Ağırlık (Fg)
+            </div>
+            <div class="meter-value" id="weight-value">0.00 N</div>
+            <div class="meter-bar-wrap">
+              <div class="meter-bar gravity-bar" id="weight-bar" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="force-meter" id="buoyancy-meter">
+            <div class="meter-label">
+              <span class="force-dot buoyancy"></span>
+              Kaldırma Kuvveti (Fk)
+            </div>
+            <div class="meter-value" id="buoyancy-value">0.00 N</div>
+            <div class="meter-bar-wrap">
+              <div class="meter-bar buoyancy-bar" id="buoyancy-bar" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="force-meter" id="net-meter">
+            <div class="meter-label">
+              <span class="force-dot net"></span>
+              Net Kuvvet (Fnet)
+            </div>
+            <div class="meter-value" id="net-value">0.00 N</div>
+            <div class="meter-bar-wrap">
+              <div class="meter-bar net-bar" id="net-bar" style="width:0%"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Submersion Info -->
+        <section class="panel-card" id="submersion-card">
+          <h2 class="panel-title">📐 Batma Bilgisi</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Batma Oranı</span>
+              <span class="info-val" id="submersion-pct">0%</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Batık Hacim</span>
+              <span class="info-val" id="submerged-vol">0.00 L</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Durum</span>
+              <span class="info-val status-text" id="object-status">Havada</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Formula Box -->
+        <section class="panel-card" id="formula-card">
+          <h2 class="panel-title">📐 Formüller</h2>
+          <div class="formula-list">
+            <div class="formula-item">
+              <div class="formula-name">Ağırlık</div>
+              <div class="formula-eq">Fg = m × g</div>
+              <div class="formula-calc" id="formula-fg">= 0 × 9.8</div>
+            </div>
+            <div class="formula-item">
+              <div class="formula-name">Kaldırma Kuvveti</div>
+              <div class="formula-eq">Fk = ρ<sub>s</sub> × V<sub>b</sub> × g</div>
+              <div class="formula-calc" id="formula-fk">= 0 × 0 × 9.8</div>
+            </div>
+            <div class="formula-item">
+              <div class="formula-name">Arşimet Prensibi</div>
+              <div class="formula-eq">Fk = Yerinden edilen sıvının ağırlığı</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Archimedes Fact -->
+        <section class="panel-card" id="fact-card">
+          <div class="fact-content">
+            <span class="fact-icon">💡</span>
+            <p id="fact-text">Bir cisme etki eden kaldırma kuvveti, cismin yerinden ettiği sıvının ağırlığına eşittir.</p>
+          </div>
+        </section>
+      </aside>
+    </main>
+
+    <!-- Info Modal -->
+    <div id="info-modal" class="modal hidden">
+      <div class="modal-backdrop"></div>
+      <div class="modal-content">
+        <button class="modal-close" id="close-modal">✕</button>
+        <h2>Kaldırma Kuvveti Hakkında</h2>
+        <p><strong>Arşimet Prensibi:</strong> Bir sıvı içine tamamen ya da kısmen daldırılmış bir cisme, sıvı tarafından yukarı doğru uygulanan kuvvete kaldırma kuvveti denir.</p>
+        <p><strong>Formül:</strong> <code>Fk = ρ_sıvı × V_batık × g</code></p>
+        <ul>
+          <li><strong>ρ_sıvı:</strong> Sıvının özkütlesi (kg/L veya kg/m³)</li>
+          <li><strong>V_batık:</strong> Cismin sıvı içindeki hacmi (m³)</li>
+          <li><strong>g:</strong> Yerçekimi ivmesi (9.8 m/s²)</li>
+        </ul>
+        <p><strong>Simülasyon Kullanımı:</strong></p>
+        <ul>
+          <li>Bloğu sürükleyerek sıvının içine daldırın</li>
+          <li>Kütle ve hacim değerlerini kaydırıcıyla ayarlayın</li>
+          <li>Farklı sıvılar seçerek kaldırma kuvvetinin nasıl değiştiğini gözlemleyin</li>
+        </ul>
+        <button class="btn btn-primary" id="close-modal-btn">Tamam</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="simulation.js"></script>
+</body>
+</html>
