@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eğik Atış Simülasyonu</title>
+  <meta name="description" content="Hava sürtünmesi ve vektör gösterimi ile interaktif eğik atış simülasyonu. Fizik öğrencileri için kapsamlı eğitim aracı." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+
+    <!-- ── HEADER ── -->
+    <header id="main-header">
+      <div class="header-left">
+        <div class="logo-icon">🎯</div>
+        <div>
+          <h1 id="app-title">Eğik Atış Simülasyonu</h1>
+          <p class="subtitle">İnteraktif Fizik Laboratuvarı</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="badge" id="mode-badge">Sürtünmesiz</div>
+        <button id="btn-formula-toggle" class="icon-btn" title="Formüller">𝑓(x)</button>
+      </div>
+    </header>
+
+    <!-- ── MAIN LAYOUT ── -->
+    <div id="main-layout">
+
+      <!-- ══ LEFT PANEL – Controls ══ -->
+      <aside id="left-panel">
+
+        <section class="panel-section">
+          <h2 class="section-title">🚀 Başlatma Parametreleri</h2>
+
+          <div class="control-group">
+            <label for="input-velocity">Başlangıç Hızı (v₀)</label>
+            <div class="slider-row">
+              <input type="range" id="input-velocity" min="1" max="100" value="30" step="1" />
+              <span class="value-badge" id="val-velocity">30 m/s</span>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label for="input-angle">Atış Açısı (θ)</label>
+            <div class="slider-row">
+              <input type="range" id="input-angle" min="1" max="89" value="45" step="1" />
+              <span class="value-badge" id="val-angle">45°</span>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label for="input-height">Başlangıç Yüksekliği (h₀)</label>
+            <div class="slider-row">
+              <input type="range" id="input-height" min="0" max="100" value="0" step="1" />
+              <span class="value-badge" id="val-height">0 m</span>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label for="input-gravity">Yerçekimi (g)</label>
+            <div class="slider-row">
+              <input type="range" id="input-gravity" min="1" max="25" value="9.81" step="0.01" />
+              <span class="value-badge" id="val-gravity">9.81 m/s²</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel-section">
+          <h2 class="section-title">💨 Hava Sürtünmesi</h2>
+
+          <div class="toggle-row">
+            <label class="toggle-label" for="cb-drag">Hava Sürtünmesi</label>
+            <label class="switch">
+              <input type="checkbox" id="cb-drag" />
+              <span class="slider-toggle"></span>
+            </label>
+          </div>
+
+          <div id="drag-options" class="drag-options hidden">
+            <div class="control-group">
+              <label for="input-mass">Kütle (m)</label>
+              <div class="slider-row">
+                <input type="range" id="input-mass" min="0.1" max="10" value="1" step="0.1" />
+                <span class="value-badge" id="val-mass">1.0 kg</span>
+              </div>
+            </div>
+            <div class="control-group">
+              <label for="input-drag">Sürtünme Katsayısı (C_D)</label>
+              <div class="slider-row">
+                <input type="range" id="input-drag" min="0.01" max="1" value="0.47" step="0.01" />
+                <span class="value-badge" id="val-drag">0.47</span>
+              </div>
+            </div>
+            <div class="control-group">
+              <label for="input-area">Kesit Alanı (A)</label>
+              <div class="slider-row">
+                <input type="range" id="input-area" min="0.001" max="0.5" value="0.02" step="0.001" />
+                <span class="value-badge" id="val-area">0.020 m²</span>
+              </div>
+            </div>
+            <p class="note">ρ(hava) = 1.225 kg/m³</p>
+          </div>
+        </section>
+
+        <section class="panel-section">
+          <h2 class="section-title">👁️ Görünüm</h2>
+          <div class="toggle-row">
+            <label class="toggle-label">Hız Vektörü</label>
+            <label class="switch"><input type="checkbox" id="cb-velocity-vec" checked /><span class="slider-toggle"></span></label>
+          </div>
+          <div class="toggle-row">
+            <label class="toggle-label">Bileşen Vektörler</label>
+            <label class="switch"><input type="checkbox" id="cb-component-vec" /><span class="slider-toggle"></span></label>
+          </div>
+          <div class="toggle-row">
+            <label class="toggle-label">İz (Trajectory)</label>
+            <label class="switch"><input type="checkbox" id="cb-trail" checked /><span class="slider-toggle"></span></label>
+          </div>
+          <div class="toggle-row">
+            <label class="toggle-label">Sürtünmeli Karşılaştırma</label>
+            <label class="switch"><input type="checkbox" id="cb-compare" /><span class="slider-toggle"></span></label>
+          </div>
+
+          <div class="control-group" style="margin-top:12px;">
+            <label for="input-projectile">Cisim Türü</label>
+            <select id="input-projectile">
+              <option value="ball">⚽ Top</option>
+              <option value="cannon">💣 Gülle</option>
+              <option value="arrow">🏹 Ok</option>
+              <option value="rocket">🚀 Roket</option>
+            </select>
+          </div>
+        </section>
+
+        <div class="btn-group">
+          <button id="btn-launch" class="btn-primary" title="Fırlat (Space)">▶ Fırlat</button>
+          <button id="btn-pause" class="btn-secondary" title="Durdur (P)" disabled>⏸ Duraklat</button>
+          <button id="btn-reset" class="btn-secondary" title="Sıfırla (R)">↺ Sıfırla</button>
+        </div>
+
+      </aside>
+
+      <!-- ══ CANVAS AREA ══ -->
+      <main id="canvas-wrapper">
+        <canvas id="sim-canvas"></canvas>
+
+        <!-- Live stats overlay -->
+        <div id="stats-overlay">
+          <div class="stat-item">
+            <span class="stat-label">Zaman</span>
+            <span class="stat-value" id="stat-time">0.00 s</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">|v|</span>
+            <span class="stat-value" id="stat-speed">— m/s</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">x</span>
+            <span class="stat-value" id="stat-x">0.0 m</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">y</span>
+            <span class="stat-value" id="stat-y">0.0 m</span>
+          </div>
+        </div>
+
+        <!-- Results banner -->
+        <div id="results-banner" class="hidden">
+          <div class="result-grid">
+            <div class="result-item">
+              <span class="r-label">🏁 Menzil</span>
+              <span class="r-value" id="res-range">—</span>
+            </div>
+            <div class="result-item">
+              <span class="r-label">⬆ Maks. Yükseklik</span>
+              <span class="r-value" id="res-height">—</span>
+            </div>
+            <div class="result-item">
+              <span class="r-label">⏱ Uçuş Süresi</span>
+              <span class="r-value" id="res-time">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zoom controls -->
+        <div id="zoom-controls">
+          <button id="btn-zoom-in" class="zoom-btn" title="Yakınlaştır">+</button>
+          <button id="btn-zoom-out" class="zoom-btn" title="Uzaklaştır">−</button>
+          <button id="btn-zoom-fit" class="zoom-btn" title="Sığdır">⊡</button>
+        </div>
+      </main>
+
+      <!-- ══ RIGHT PANEL – Formulas ══ -->
+      <aside id="formula-panel">
+        <h2 class="section-title formula-header">📐 Eğik Atış Formülleri</h2>
+
+        <div class="formula-block">
+          <h3 class="formula-category">Bileşen Hızlar</h3>
+          <div class="formula-card">
+            <div class="formula-name">Yatay bileşen</div>
+            <div class="formula-expr">v<sub>x</sub> = v<sub>0</sub> · cos θ</div>
+            <div class="formula-live" id="live-vx">= — m/s</div>
+          </div>
+          <div class="formula-card">
+            <div class="formula-name">Dikey bileşen (başlangıç)</div>
+            <div class="formula-expr">v<sub>y0</sub> = v<sub>0</sub> · sin θ</div>
+            <div class="formula-live" id="live-vy0">= — m/s</div>
+          </div>
+          <div class="formula-card">
+            <div class="formula-name">Dikey bileşen (t anında)</div>
+            <div class="formula-expr">v<sub>y</sub>(t) = v<sub>y0</sub> − g·t</div>
+            <div class="formula-live" id="live-vy">= — m/s</div>
+          </div>
+        </div>
+
+        <div class="formula-block">
+          <h3 class="formula-category">Konum Denklemleri</h3>
+          <div class="formula-card">
+            <div class="formula-name">Yatay konum</div>
+            <div class="formula-expr">x(t) = v<sub>x</sub> · t</div>
+            <div class="formula-live" id="live-x">= — m</div>
+          </div>
+          <div class="formula-card">
+            <div class="formula-name">Dikey konum</div>
+            <div class="formula-expr">y(t) = h<sub>0</sub> + v<sub>y0</sub>·t − ½g·t²</div>
+            <div class="formula-live" id="live-y">= — m</div>
+          </div>
+        </div>
+
+        <div class="formula-block">
+          <h3 class="formula-category">Tepe Noktası</h3>
+          <div class="formula-card">
+            <div class="formula-name">Maksimum yükseklik zamanı</div>
+            <div class="formula-expr">t<sub>tepe</sub> = v<sub>y0</sub> / g</div>
+            <div class="formula-live" id="live-t-peak">= — s</div>
+          </div>
+          <div class="formula-card">
+            <div class="formula-name">Maksimum yükseklik</div>
+            <div class="formula-expr">H = h<sub>0</sub> + v<sub>y0</sub>² / (2g)</div>
+            <div class="formula-live" id="live-h-max">= — m</div>
+          </div>
+        </div>
+
+        <div class="formula-block">
+          <h3 class="formula-category">Menzil (h₀=0)</h3>
+          <div class="formula-card">
+            <div class="formula-name">Uçuş süresi</div>
+            <div class="formula-expr">T = 2v<sub>y0</sub> / g</div>
+            <div class="formula-live" id="live-T">= — s</div>
+          </div>
+          <div class="formula-card">
+            <div class="formula-name">Maksimum menzil</div>
+            <div class="formula-expr">R = v<sub>0</sub>²·sin(2θ) / g</div>
+            <div class="formula-live" id="live-R">= — m</div>
+          </div>
+        </div>
+
+        <div class="formula-block" id="drag-formula-section">
+          <h3 class="formula-category">💨 Hava Sürtünmesi</h3>
+          <div class="formula-card accent-card">
+            <div class="formula-name">Sürtünme kuvveti</div>
+            <div class="formula-expr">F<sub>d</sub> = ½ · ρ · C<sub>D</sub> · A · v²</div>
+          </div>
+          <div class="formula-card accent-card">
+            <div class="formula-name">x yönü ivmesi</div>
+            <div class="formula-expr">a<sub>x</sub> = −(F<sub>d</sub>/m) · (v<sub>x</sub>/v)</div>
+          </div>
+          <div class="formula-card accent-card">
+            <div class="formula-name">y yönü ivmesi</div>
+            <div class="formula-expr">a<sub>y</sub> = −g − (F<sub>d</sub>/m) · (v<sub>y</sub>/v)</div>
+          </div>
+          <div class="formula-card accent-card">
+            <div class="formula-name">Toplam hız</div>
+            <div class="formula-expr">v = √(v<sub>x</sub>² + v<sub>y</sub>²)</div>
+          </div>
+          <div class="formula-live drag-note" id="live-fd">F<sub>d</sub> = — N</div>
+        </div>
+
+      </aside>
+
+    </div><!-- /main-layout -->
+  </div><!-- /app -->
+
+  <script src="simulation.js"></script>
+</body>
+</html>
